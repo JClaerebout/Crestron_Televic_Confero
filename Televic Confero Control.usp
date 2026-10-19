@@ -6,8 +6,8 @@
 
 STRING_PARAMETER IP[255];
 STRING_PARAMETER API_Key[255];
-DIGITAL_INPUT Initialize;
-DIGITAL_OUTPUT Connected_fb;
+DIGITAL_INPUT _skip_,_skip_,Initialize;
+DIGITAL_OUTPUT _skip_,_skip_,Connected_fb;
 ANALOG_OUTPUT Last_Active_Mic;
 ANALOG_OUTPUT First_Active_Mic;
 
@@ -16,9 +16,12 @@ INTEGER Ready;
 
 EVENTHANDLER Controller_OnFeedback(ConferoController sender, MicFeedbackEventArgs e)
 {
-    Connected_fb = e.Connected;
-    First_Active_Mic = e.FirstActiveMic;
-    Last_Active_Mic = e.LastActiveMic;
+    IF (Connected_fb <> e.Connected)
+        Connected_fb = e.Connected;
+    IF (First_Active_Mic <> e.FirstActiveMic)
+        First_Active_Mic = e.FirstActiveMic;
+    IF (Last_Active_Mic <> e.LastActiveMic)
+        Last_Active_Mic = e.LastActiveMic;
 }
 
 PUSH Initialize

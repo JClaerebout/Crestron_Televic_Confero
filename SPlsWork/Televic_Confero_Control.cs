@@ -35,11 +35,26 @@ namespace UserModule_TELEVIC_CONFERO_CONTROL
                 SplusExecutionContext __context__ = SplusSimplSharpDelegateThreadStartCode();
                 
                 __context__.SourceCodeLine = 1;
-                CONNECTED_FB  .Value = (ushort) ( E.Connected ) ; 
+                if ( Functions.TestForTrue  ( ( Functions.BoolToInt (CONNECTED_FB  .Value != E.Connected))  ) ) 
+                    {
+                    __context__.SourceCodeLine = 1;
+                    CONNECTED_FB  .Value = (ushort) ( E.Connected ) ; 
+                    }
+                
                 __context__.SourceCodeLine = 1;
-                FIRST_ACTIVE_MIC  .Value = (ushort) ( E.FirstActiveMic ) ; 
+                if ( Functions.TestForTrue  ( ( Functions.BoolToInt (FIRST_ACTIVE_MIC  .Value != E.FirstActiveMic))  ) ) 
+                    {
+                    __context__.SourceCodeLine = 1;
+                    FIRST_ACTIVE_MIC  .Value = (ushort) ( E.FirstActiveMic ) ; 
+                    }
+                
                 __context__.SourceCodeLine = 1;
-                LAST_ACTIVE_MIC  .Value = (ushort) ( E.LastActiveMic ) ; 
+                if ( Functions.TestForTrue  ( ( Functions.BoolToInt (LAST_ACTIVE_MIC  .Value != E.LastActiveMic))  ) ) 
+                    {
+                    __context__.SourceCodeLine = 1;
+                    LAST_ACTIVE_MIC  .Value = (ushort) ( E.LastActiveMic ) ; 
+                    }
+                
                 
                 
             }

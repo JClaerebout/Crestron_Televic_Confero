@@ -58,9 +58,26 @@ namespace TelevicConfero
             }
         }
 
+        private static async Task<HttpResponseMessage> GetResponse(HttpClient client, string path, CancellationToken token)
+        {
+            try
+            {
+                return await client.GetAsync(path, token).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                if (token.IsCancellationRequested) throw;
+                throw new TimeoutException("HTTP request timed out after 40 seconds: " + new Uri(client.BaseAddress, path));
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new HttpRequestException("GET " + new Uri(client.BaseAddress, path) + ": " + ex.Message, ex);
+            }
+        }
+
         private static async Task<JArray> ReadSpeakers(HttpClient client, CancellationToken token)
         {
-            using (var response = await client.GetAsync("api/discussion/speakers", token).ConfigureAwait(false))
+            using (var response = await GetResponse(client, "api/discussion/speakers", token).ConfigureAwait(false))
             {
                 response.EnsureSuccessStatusCode();
                 return JArray.Parse(await response.Content.ReadAsStringAsync().ConfigureAwait(false));
@@ -76,6 +93,7 @@ namespace TelevicConfero
                 var address = new UriBuilder("http://" + ip.Trim());
                 if (address.Port == 80) address.Port = 9080;
                 address.Path = "/";
+                CrestronConsole.PrintLine("Confero: Connecting to {0} (HTTP speaker events)", address.Uri);
                 using (var client = new HttpClient())
                 {
                     client.BaseAddress = address.Uri;
@@ -93,17 +111,38 @@ namespace TelevicConfero
                                 var path = "api/notification/events?include-filter=Discussion";
                                 if (lastId.HasValue) path += "&minimum-id=" + (lastId.Value + 1);
                                 // Open the long poll before the startup snapshot to avoid a subscription gap.
-                                var pending = client.GetAsync(path, token);
+                                var pending = GetResponse(client, path, token);
                                 try
                                 {
-                                    if (firstPoll) speakers = await ReadSpeakers(client, token).ConfigureAwait(false);
+                                    if (firstPoll)
+                                    {
+                                        speakers = await ReadSpeakers(client, token).ConfigureAwait(false);
+                                        // An idle room may not produce an event response for some time.
+                                        // A successful authenticated snapshot already confirms connectivity.
+                                        Publish(token, true, speakers);
+                                    }
                                 }
                                 catch
                                 {
                                     try { using (await pending.ConfigureAwait(false)) { } } catch { }
                                     throw;
                                 }
-                                using (var response = await pending.ConfigureAwait(false))
+                                HttpResponseMessage eventResponse;
+                                try
+                                {
+                                    eventResponse = await pending.ConfigureAwait(false);
+                                }
+                                catch (TimeoutException)
+                                {
+                                    // An idle long poll can outlive the client timeout. Check the
+                                    // ordinary API before declaring a failed connection, and retain
+                                    // the event cursor so renewal does not discard queued changes.
+                                    speakers = await ReadSpeakers(client, token).ConfigureAwait(false);
+                                    Publish(token, true, speakers);
+                                    firstPoll = false;
+                                    continue;
+                                }
+                                using (var response = eventResponse)
                                 {
                                     response.EnsureSuccessStatusCode();
                                     bool refresh = firstPoll;
