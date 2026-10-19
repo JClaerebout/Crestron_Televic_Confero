@@ -16,7 +16,7 @@ namespace TelevicConfero
         public ushort LastActiveMic { get; set; }
     }
 
-    public class ConferoController
+    public partial class ConferoController
     {
         private readonly object sync = new object();
         private CancellationTokenSource session;
@@ -25,11 +25,14 @@ namespace TelevicConfero
         // Each pulse replaces the previous subscription; old callbacks are suppressed.
         public void Initialize(string ip, string apiKey)
         {
+            if (!string.IsNullOrWhiteSpace(ip) && !ip.Contains("://"))
+                ip = (defaultHttps ? "https://" : "http://") + ip.Trim();
             lock (sync)
             {
                 if (session != null) session.Cancel();
                 session = new CancellationTokenSource();
                 var token = session.Token;
+                ResetModule(ip, apiKey, token);
                 Publish(token, false, null);
                 Task.Run(() => RunAsync(ip, apiKey, token));
             }
@@ -49,6 +52,7 @@ namespace TelevicConfero
             lock (sync)
             {
                 if (token.IsCancellationRequested) return;
+                PublishModuleSpeakers(token, connected, speakers);
                 var handler = OnFeedback;
                 if (handler != null) handler(this, new MicFeedbackEventArgs
                 {
@@ -58,11 +62,13 @@ namespace TelevicConfero
             }
         }
 
-        private static async Task<HttpResponseMessage> GetResponse(HttpClient client, string path, CancellationToken token)
+        private async Task<HttpResponseMessage> GetResponse(HttpClient client, string path, CancellationToken token)
         {
             try
             {
-                return await client.GetAsync(path, token).ConfigureAwait(false);
+                var response = await client.GetAsync(path, token).ConfigureAwait(false);
+                Trace("GET " + path + " HTTP " + (int)response.StatusCode);
+                return response;
             }
             catch (OperationCanceledException)
             {
@@ -75,7 +81,7 @@ namespace TelevicConfero
             }
         }
 
-        private static async Task<JArray> ReadSpeakers(HttpClient client, CancellationToken token)
+        private async Task<JArray> ReadSpeakers(HttpClient client, CancellationToken token)
         {
             using (var response = await GetResponse(client, "api/discussion/speakers", token).ConfigureAwait(false))
             {
@@ -90,10 +96,10 @@ namespace TelevicConfero
             {
                 if (string.IsNullOrWhiteSpace(ip) || string.IsNullOrWhiteSpace(apiKey))
                     throw new ArgumentException("IP and API_Key must be configured");
-                var address = new UriBuilder("http://" + ip.Trim());
-                if (address.Port == 80) address.Port = 9080;
+                var address = new UriBuilder(ip.Contains("://") ? ip.Trim() : "http://" + ip.Trim());
+                if (address.Port == 80 || address.Port == 443) address.Port = address.Scheme == "https" ? 9443 : 9080;
                 address.Path = "/";
-                CrestronConsole.PrintLine("Confero: Connecting to {0} (HTTP speaker events)", address.Uri);
+                Trace("Connecting to " + address.Uri);
                 using (var client = new HttpClient())
                 {
                     client.BaseAddress = address.Uri;
@@ -108,7 +114,7 @@ namespace TelevicConfero
                             JArray speakers = null;
                             while (!token.IsCancellationRequested)
                             {
-                                var path = "api/notification/events?include-filter=Discussion";
+                                var path = "api/notification/events?include-filter=Discussion,Meeting,Room,Recording";
                                 if (lastId.HasValue) path += "&minimum-id=" + (lastId.Value + 1);
                                 // Open the long poll before the startup snapshot to avoid a subscription gap.
                                 var pending = GetResponse(client, path, token);
@@ -120,6 +126,7 @@ namespace TelevicConfero
                                         // An idle room may not produce an event response for some time.
                                         // A successful authenticated snapshot already confirms connectivity.
                                         Publish(token, true, speakers);
+                                        await RefreshModule(token, true).ConfigureAwait(false);
                                     }
                                 }
                                 catch
@@ -139,6 +146,7 @@ namespace TelevicConfero
                                     // the event cursor so renewal does not discard queued changes.
                                     speakers = await ReadSpeakers(client, token).ConfigureAwait(false);
                                     Publish(token, true, speakers);
+                                    await RefreshModule(token, false).ConfigureAwait(false);
                                     firstPoll = false;
                                     continue;
                                 }
@@ -149,6 +157,7 @@ namespace TelevicConfero
                                     if (response.StatusCode != HttpStatusCode.NoContent)
                                     {
                                         var notification = JObject.Parse(await response.Content.ReadAsStringAsync().ConfigureAwait(false));
+                                        await ModuleEvent(token, notification).ConfigureAwait(false);
                                         lastId = (long)notification["id"];
                                         refresh |= (bool?)notification["discontinuity"] == true;
                                         if ((string)notification["module"] == "Discussion" &&
@@ -164,6 +173,7 @@ namespace TelevicConfero
                                     Publish(token, true, speakers);
                                 }
                                 firstPoll = false;
+                                await RefreshModule(token, false).ConfigureAwait(false);
                                 await Task.Delay(50, token).ConfigureAwait(false);
                             }
                         }
@@ -171,7 +181,7 @@ namespace TelevicConfero
                         {
                             if (token.IsCancellationRequested) return;
                             Publish(token, false, null);
-                            CrestronConsole.PrintLine("Confero: {0}", ex.Message);
+                            Trace(ex.Message);
                             await Task.Delay(2000, token).ConfigureAwait(false);
                         }
                     }
@@ -181,7 +191,7 @@ namespace TelevicConfero
             catch (Exception ex)
             {
                 Publish(token, false, null);
-                CrestronConsole.PrintLine("Confero: {0}", ex.Message);
+                Trace(ex.Message);
             }
         }
     }

@@ -4,15 +4,163 @@
 #PRINT_TO_TRACE
 #USER_SIMPLSHARP_LIBRARY "Televic Confero"
 
+// Edit these capacities for the installation, then rebuild and update the symbol.
+#DEFINE_CONSTANT MIC_COUNT 15
+#DEFINE_CONSTANT SPEAKER_LIST_COUNT 15
+#DEFINE_CONSTANT QUEUE_LIST_COUNT 15
+#DEFINE_CONSTANT MEETING_LIST_COUNT 20
+#DEFINE_CONSTANT REFRESH_SECONDS 30
+#DEFINE_CONSTANT DEFAULT_HTTPS 0
+#DEFINE_CONSTANT DEBUG_PRINT 0
+
 STRING_PARAMETER IP[255];
 STRING_PARAMETER API_Key[255];
 DIGITAL_INPUT _skip_,_skip_,Initialize;
+DIGITAL_INPUT Refresh, Meeting_Start, Meeting_Stop, Start_Selected_Meeting;
+DIGITAL_INPUT Clear_Speakers, Clear_Requests, Turn_Off_Selected_Speaker, Enable_Selected_Request;
+DIGITAL_INPUT Recording_Start, Recording_Stop, Wireless_Turn_Off, Apply_Discussion_Settings;
+ANALOG_INPUT Selected_Speaker, Selected_Request, Selected_Meeting;
+ANALOG_INPUT Discussion_Mode, Number_Of_Open_Mics;
+DIGITAL_INPUT Mic_On[MIC_COUNT], Mic_Off[MIC_COUNT];
 DIGITAL_OUTPUT _skip_,_skip_,Connected_fb;
+DIGITAL_OUTPUT Meeting_Running_fb, Recording_Active_fb;
 ANALOG_OUTPUT Last_Active_Mic;
 ANALOG_OUTPUT First_Active_Mic;
+ANALOG_OUTPUT Mic_Count_fb, Speaker_Count_fb, Request_Count_fb, Meeting_Count_fb;
+ANALOG_OUTPUT Discussion_Mode_fb, Number_Of_Open_Mics_fb;
+STRING_OUTPUT Meeting_Title_fb, Meeting_ID_fb, Recording_State_fb, Status_fb;
+DIGITAL_OUTPUT Mic_On_fb[MIC_COUNT], Mic_Request_fb[MIC_COUNT];
+ANALOG_OUTPUT Mic_Number[MIC_COUNT], Speaker_Number[SPEAKER_LIST_COUNT], Request_Number[QUEUE_LIST_COUNT];
+STRING_OUTPUT Mic_Name[MIC_COUNT], Mic_Role[MIC_COUNT];
+STRING_OUTPUT Speaker_Name[SPEAKER_LIST_COUNT], Request_Name[QUEUE_LIST_COUNT];
+STRING_OUTPUT Scheduled_Meeting_Name[MEETING_LIST_COUNT], Scheduled_Meeting_ID[MEETING_LIST_COUNT];
 
 ConferoController Controller;
 INTEGER Ready;
+// STRING_OUTPUT is write-only; retain the last transmitted text for comparison.
+STRING Last_Meeting_Title[255], Last_Meeting_ID[255], Last_Recording_State[255], Last_Status[255];
+STRING Last_Mic_Name[MIC_COUNT][255], Last_Mic_Role[MIC_COUNT][255];
+STRING Last_Speaker_Name[SPEAKER_LIST_COUNT][255], Last_Request_Name[QUEUE_LIST_COUNT][255];
+STRING Last_Scheduled_Meeting_Name[MEETING_LIST_COUNT][255], Last_Scheduled_Meeting_ID[MEETING_LIST_COUNT][255];
+
+EVENTHANDLER Controller_OnModuleFeedback(ConferoController sender, ModuleFeedbackEventArgs e)
+{
+    INTEGER i;
+    STRING NewText[255];
+    IF (Mic_Count_fb <> e.SeatCount)
+        Mic_Count_fb = e.SeatCount;
+    IF (Speaker_Count_fb <> e.SpeakerCount)
+        Speaker_Count_fb = e.SpeakerCount;
+    IF (Request_Count_fb <> e.RequestCount)
+        Request_Count_fb = e.RequestCount;
+    IF (Meeting_Count_fb <> e.MeetingCount)
+        Meeting_Count_fb = e.MeetingCount;
+    IF (Meeting_Running_fb <> e.MeetingRunning)
+        Meeting_Running_fb = e.MeetingRunning;
+    IF (Recording_Active_fb <> e.RecordingActive)
+        Recording_Active_fb = e.RecordingActive;
+    IF (Discussion_Mode_fb <> e.DiscussionMode)
+        Discussion_Mode_fb = e.DiscussionMode;
+    IF (Number_Of_Open_Mics_fb <> e.OpenMics)
+        Number_Of_Open_Mics_fb = e.OpenMics;
+    NewText = e.MeetingTitle;
+    IF (Last_Meeting_Title <> NewText)
+    {
+        Last_Meeting_Title = NewText;
+        Meeting_Title_fb = NewText;
+    }
+    NewText = e.MeetingId;
+    IF (Last_Meeting_ID <> NewText)
+    {
+        Last_Meeting_ID = NewText;
+        Meeting_ID_fb = NewText;
+    }
+    NewText = e.RecordingState;
+    IF (Last_Recording_State <> NewText)
+    {
+        Last_Recording_State = NewText;
+        Recording_State_fb = NewText;
+    }
+    NewText = e.Status;
+    IF (Last_Status <> NewText)
+    {
+        Last_Status = NewText;
+        Status_fb = NewText;
+    }
+    FOR (i = 1 TO MIC_COUNT)
+    {
+        IF (Mic_Number[i] <> Controller.GetSeatNumber(i))
+            Mic_Number[i] = Controller.GetSeatNumber(i);
+        IF (Mic_On_fb[i] <> Controller.GetSeatMic(i))
+            Mic_On_fb[i] = Controller.GetSeatMic(i);
+        IF (Mic_Request_fb[i] <> Controller.GetSeatRequest(i))
+            Mic_Request_fb[i] = Controller.GetSeatRequest(i);
+        NewText = Controller.GetSeatName(i);
+        IF (Last_Mic_Name[i] <> NewText)
+        {
+            Last_Mic_Name[i] = NewText;
+            Mic_Name[i] = NewText;
+        }
+        NewText = Controller.GetSeatRole(i);
+        IF (Last_Mic_Role[i] <> NewText)
+        {
+            Last_Mic_Role[i] = NewText;
+            Mic_Role[i] = NewText;
+        }
+    }
+    FOR (i = 1 TO SPEAKER_LIST_COUNT)
+    {
+        IF (Speaker_Number[i] <> Controller.GetSpeakerNumber(i))
+            Speaker_Number[i] = Controller.GetSpeakerNumber(i);
+        NewText = Controller.GetSpeakerName(i);
+        IF (Last_Speaker_Name[i] <> NewText)
+        {
+            Last_Speaker_Name[i] = NewText;
+            Speaker_Name[i] = NewText;
+        }
+    }
+    FOR (i = 1 TO QUEUE_LIST_COUNT)
+    {
+        IF (Request_Number[i] <> Controller.GetRequestNumber(i))
+            Request_Number[i] = Controller.GetRequestNumber(i);
+        NewText = Controller.GetRequestName(i);
+        IF (Last_Request_Name[i] <> NewText)
+        {
+            Last_Request_Name[i] = NewText;
+            Request_Name[i] = NewText;
+        }
+    }
+    FOR (i = 1 TO MEETING_LIST_COUNT)
+    {
+        NewText = Controller.GetMeetingName(i);
+        IF (Last_Scheduled_Meeting_Name[i] <> NewText)
+        {
+            Last_Scheduled_Meeting_Name[i] = NewText;
+            Scheduled_Meeting_Name[i] = NewText;
+        }
+        NewText = Controller.GetMeetingId(i);
+        IF (Last_Scheduled_Meeting_ID[i] <> NewText)
+        {
+            Last_Scheduled_Meeting_ID[i] = NewText;
+            Scheduled_Meeting_ID[i] = NewText;
+        }
+    }
+}
+
+PUSH Refresh { IF (Ready) Controller.Refresh(); }
+PUSH Meeting_Start { IF (Ready) Controller.StartMeeting(); }
+PUSH Meeting_Stop { IF (Ready) Controller.StopMeeting(); }
+PUSH Start_Selected_Meeting { IF (Ready) Controller.StartScheduledMeeting(Selected_Meeting); }
+PUSH Clear_Speakers { IF (Ready) Controller.ClearSpeakers(); }
+PUSH Clear_Requests { IF (Ready) Controller.ClearRequests(); }
+PUSH Turn_Off_Selected_Speaker { IF (Ready) Controller.TurnOffSpeaker(Selected_Speaker); }
+PUSH Enable_Selected_Request { IF (Ready) Controller.EnableRequest(Selected_Request); }
+PUSH Recording_Start { IF (Ready) Controller.SetRecording(1); }
+PUSH Recording_Stop { IF (Ready) Controller.SetRecording(0); }
+PUSH Wireless_Turn_Off { IF (Ready) Controller.WirelessTurnOff(); }
+PUSH Apply_Discussion_Settings { IF (Ready) Controller.ApplySettings(Discussion_Mode, Number_Of_Open_Mics); }
+PUSH Mic_On { IF (Ready) Controller.SetSeatMic(GetLastModifiedArrayIndex(), 1); }
+PUSH Mic_Off { IF (Ready) Controller.SetSeatMic(GetLastModifiedArrayIndex(), 0); }
 
 EVENTHANDLER Controller_OnFeedback(ConferoController sender, MicFeedbackEventArgs e)
 {
@@ -38,6 +186,9 @@ FUNCTION Main()
     Last_Active_Mic = 0;
     WaitForInitializationComplete();
     RegisterEvent(Controller, OnFeedback, Controller_OnFeedback);
+    RegisterEvent(Controller, OnModuleFeedback, Controller_OnModuleFeedback);
+    Controller.Configure(MIC_COUNT, SPEAKER_LIST_COUNT, QUEUE_LIST_COUNT, MEETING_LIST_COUNT, REFRESH_SECONDS);
+    Controller.ConfigureTransport(DEFAULT_HTTPS, DEBUG_PRINT);
     Ready = 1;
     IF (Initialize = 1)
         Controller.Initialize(IP, API_Key);
