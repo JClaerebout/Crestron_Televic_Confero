@@ -1,0 +1,41 @@
+#SYMBOL_NAME "Televic Confero Control"
+#DEFAULT_VOLATILE
+#ENABLE_STACK_CHECKING
+#PRINT_TO_TRACE
+#USER_SIMPLSHARP_LIBRARY "Televic Confero"
+
+STRING_PARAMETER IP[255];
+STRING_PARAMETER API_Key[255];
+DIGITAL_INPUT Initialize;
+DIGITAL_OUTPUT Connected_fb;
+ANALOG_OUTPUT Last_Active_Mic;
+ANALOG_OUTPUT First_Active_Mic;
+
+ConferoController Controller;
+INTEGER Ready;
+
+EVENTHANDLER Controller_OnFeedback(ConferoController sender, MicFeedbackEventArgs e)
+{
+    Connected_fb = e.Connected;
+    First_Active_Mic = e.FirstActiveMic;
+    Last_Active_Mic = e.LastActiveMic;
+}
+
+PUSH Initialize
+{
+    IF (Ready = 1)
+        Controller.Initialize(IP, API_Key);
+}
+
+FUNCTION Main()
+{
+    Ready = 0;
+    Connected_fb = 0;
+    First_Active_Mic = 0;
+    Last_Active_Mic = 0;
+    WaitForInitializationComplete();
+    RegisterEvent(Controller, OnFeedback, Controller_OnFeedback);
+    Ready = 1;
+    IF (Initialize = 1)
+        Controller.Initialize(IP, API_Key);
+}

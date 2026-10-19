@@ -1,0 +1,33 @@
+C:\Users\jensclaerebout\Play AV\ProSales - Jens Claerebout\Dev\Crestron_Televic_Confero\Televic Confero c#\Televic Confero\bin\Release\Televic Confero.dll
+C:\Users\jensclaerebout\Play AV\ProSales - Jens Claerebout\Dev\Crestron_Televic_Confero\Televic Confero c#\Televic Confero\bin\Release\Televic Confero.pdb
+C:\Users\jensclaerebout\Play AV\ProSales - Jens Claerebout\Dev\Crestron_Televic_Confero\Televic Confero c#\Televic Confero\bin\Release\SimplSharpAutoUpdateInterface.dll
+C:\Users\jensclaerebout\Play AV\ProSales - Jens Claerebout\Dev\Crestron_Televic_Confero\Televic Confero c#\Televic Confero\bin\Release\SimplSharpCloudClientInterface.dll
+C:\Users\jensclaerebout\Play AV\ProSales - Jens Claerebout\Dev\Crestron_Televic_Confero\Televic Confero c#\Televic Confero\bin\Release\SimplSharpCryptographyInterface.dll
+C:\Users\jensclaerebout\Play AV\ProSales - Jens Claerebout\Dev\Crestron_Televic_Confero\Televic Confero c#\Televic Confero\bin\Release\SimplSharpCustomAttributesInterface.dll
+C:\Users\jensclaerebout\Play AV\ProSales - Jens Claerebout\Dev\Crestron_Televic_Confero\Televic Confero c#\Televic Confero\bin\Release\SimplSharpCWSHelperInterface.dll
+C:\Users\jensclaerebout\Play AV\ProSales - Jens Claerebout\Dev\Crestron_Televic_Confero\Televic Confero c#\Televic Confero\bin\Release\SimplSharpExchangeWebServices.dll
+C:\Users\jensclaerebout\Play AV\ProSales - Jens Claerebout\Dev\Crestron_Televic_Confero\Televic Confero c#\Televic Confero\bin\Release\SimplSharpHelperInterface.dll
+C:\Users\jensclaerebout\Play AV\ProSales - Jens Claerebout\Dev\Crestron_Televic_Confero\Televic Confero c#\Televic Confero\bin\Release\SimplSharpNewtonsoft.dll
+C:\Users\jensclaerebout\Play AV\ProSales - Jens Claerebout\Dev\Crestron_Televic_Confero\Televic Confero c#\Televic Confero\bin\Release\SimplSharpOnvifInterface.dll
+C:\Users\jensclaerebout\Play AV\ProSales - Jens Claerebout\Dev\Crestron_Televic_Confero\Televic Confero c#\Televic Confero\bin\Release\SimplSharpProgrammingInterfaces.dll
+C:\Users\jensclaerebout\Play AV\ProSales - Jens Claerebout\Dev\Crestron_Televic_Confero\Televic Confero c#\Televic Confero\bin\Release\SimplSharpReflectionInterface.dll
+C:\Users\jensclaerebout\Play AV\ProSales - Jens Claerebout\Dev\Crestron_Televic_Confero\Televic Confero c#\Televic Confero\bin\Release\SimplSharpSQLHelperInterface.dll
+C:\Users\jensclaerebout\Play AV\ProSales - Jens Claerebout\Dev\Crestron_Televic_Confero\Televic Confero c#\Televic Confero\bin\Release\SimplSharpTimerEventInterface.dll
+C:\Users\jensclaerebout\Play AV\ProSales - Jens Claerebout\Dev\Crestron_Televic_Confero\Televic Confero c#\Televic Confero\bin\Release\SimplSharpAutoUpdateInterface.xml
+C:\Users\jensclaerebout\Play AV\ProSales - Jens Claerebout\Dev\Crestron_Televic_Confero\Televic Confero c#\Televic Confero\bin\Release\SimplSharpCloudClientInterface.xml
+C:\Users\jensclaerebout\Play AV\ProSales - Jens Claerebout\Dev\Crestron_Televic_Confero\Televic Confero c#\Televic Confero\bin\Release\SimplSharpCryptographyInterface.xml
+C:\Users\jensclaerebout\Play AV\ProSales - Jens Claerebout\Dev\Crestron_Televic_Confero\Televic Confero c#\Televic Confero\bin\Release\SimplSharpCustomAttributesInterface.xml
+C:\Users\jensclaerebout\Play AV\ProSales - Jens Claerebout\Dev\Crestron_Televic_Confero\Televic Confero c#\Televic Confero\bin\Release\SimplSharpCWSHelperInterface.xml
+C:\Users\jensclaerebout\Play AV\ProSales - Jens Claerebout\Dev\Crestron_Televic_Confero\Televic Confero c#\Televic Confero\bin\Release\SimplSharpExchangeWebServices.xml
+C:\Users\jensclaerebout\Play AV\ProSales - Jens Claerebout\Dev\Crestron_Televic_Confero\Televic Confero c#\Televic Confero\bin\Release\SimplSharpHelperInterface.xml
+C:\Users\jensclaerebout\Play AV\ProSales - Jens Claerebout\Dev\Crestron_Televic_Confero\Televic Confero c#\Televic Confero\bin\Release\SimplSharpNewtonsoft.xml
+C:\Users\jensclaerebout\Play AV\ProSales - Jens Claerebout\Dev\Crestron_Televic_Confero\Televic Confero c#\Televic Confero\bin\Release\SimplSharpOnvifInterface.xml
+C:\Users\jensclaerebout\Play AV\ProSales - Jens Claerebout\Dev\Crestron_Televic_Confero\Televic Confero c#\Televic Confero\bin\Release\SimplSharpProgrammingInterfaces.xml
+C:\Users\jensclaerebout\Play AV\ProSales - Jens Claerebout\Dev\Crestron_Televic_Confero\Televic Confero c#\Televic Confero\bin\Release\SimplSharpReflectionInterface.xml
+C:\Users\jensclaerebout\Play AV\ProSales - Jens Claerebout\Dev\Crestron_Televic_Confero\Televic Confero c#\Televic Confero\bin\Release\SimplSharpSQLHelperInterface.xml
+C:\Users\jensclaerebout\Play AV\ProSales - Jens Claerebout\Dev\Crestron_Televic_Confero\Televic Confero c#\Televic Confero\bin\Release\SimplSharpTimerEventInterface.xml
+C:\Users\jensclaerebout\Play AV\ProSales - Jens Claerebout\Dev\Crestron_Televic_Confero\Televic Confero c#\Televic Confero\obj\Release\Televic Confero.csproj.AssemblyReference.cache
+C:\Users\jensclaerebout\Play AV\ProSales - Jens Claerebout\Dev\Crestron_Televic_Confero\Televic Confero c#\Televic Confero\obj\Release\Televic Confero.csproj.CoreCompileInputs.cache
+C:\Users\jensclaerebout\Play AV\ProSales - Jens Claerebout\Dev\Crestron_Televic_Confero\Televic Confero c#\Televic Confero\obj\Release\Televic .2DBF7FB0.Up2Date
+C:\Users\jensclaerebout\Play AV\ProSales - Jens Claerebout\Dev\Crestron_Televic_Confero\Televic Confero c#\Televic Confero\obj\Release\Televic Confero.dll
+C:\Users\jensclaerebout\Play AV\ProSales - Jens Claerebout\Dev\Crestron_Televic_Confero\Televic Confero c#\Televic Confero\obj\Release\Televic Confero.pdb
