@@ -15,5 +15,3 @@ Both analogs are 0 for an empty list or disconnected state, and equal for one ac
 Run `./build.ps1` to build the provided C# project, copy its CLZ beside the USP, and compile the USP. Run `./build.ps1 -Test` to also run the local HTTP integration checks. Visual Studio 2022 Community MSBuild, the bundled NuGet SDK, and the installed Crestron SIMPL+ compiler are used.
 
 The integration checks cover speaker ordering, empty and single-speaker states, removal/reactivation, connection failure/recovery, authentication, repeated initialization, notification cursors, and recovery from an actual 40-second idle event timeout without dropping connection feedback. Hardware behavior still requires validation on a Crestron processor connected to Confero.
-
-
