@@ -1,0 +1,120 @@
+{FileMetadata}
+Schema = "1.0.0.0"
+CreatedByAppHost = "2.1701.12.0"
+Created = 2026-10-28 12:52:27.537481+01:00
+LastModifiedByAppHost = "2.1701.12.0"
+Modified = 2026-10-28 12:52:27.53748+01:00
+CreatedByProjectApp = "1.4901.18.0"
+LastModifiedByProjectApp = "1.4901.18.0"
+MinimumProjectApp = "1.2600.1"
+MinimumAppHost = "2.1700.0"
+
+{Html}
+<div categoryname="Widget Components" ccid_ComponentType="Widget Canvas" id="iqnttenuz1" devicesVisited="[&quot;TSW-1080&quot;]" defaultWidth="626px" defaultHeight="39px" class="widget-container"><ch5-text clearLabel="false" labelmodeadvncomponent="simple" horizontalalignment="left" verticalalignment="middle" multilinesupport="false" truncatetext="false" id="icztxhiff9" componentName="Seat Role" ccid_ActiveFont="'Roboto'" ccid_Label="Chairperson" labelinnerhtml="Chairperson" ccid_linkSendReceive="True" ccid_ComponentType="Formatted-Text" devicesVisited="[&quot;TSW-1080&quot;]" ccid_themeCSSSet="true" oldID="i88ecyozdhgl4" pd-receivestatelabel="Contract Enabled"></ch5-text><ch5-text clearLabel="false" labelmodeadvncomponent="simple" horizontalalignment="left" verticalalignment="middle" multilinesupport="false" truncatetext="false" id="ioxkcvmmym" componentName="Seat Name" ccid_ActiveFont="'Roboto'" ccid_Label="Jens Claerebout" labelinnerhtml="Jens Claerebout" ccid_linkSendReceive="True" ccid_ComponentType="Formatted-Text" devicesVisited="[&quot;TSW-1080&quot;]" ccid_themeCSSSet="true" oldID="iwjdkll6rs8gj" pd-receivestatelabel="Contract Enabled"></ch5-text><ch5-text clearLabel="false" labelmodeadvncomponent="simple" horizontalalignment="left" verticalalignment="middle" multilinesupport="false" truncatetext="false" id="i4cz1d1ofz" componentName="Seat Number" ccid_ActiveFont="'Roboto'" ccid_Label="01" labelinnerhtml="01" ccid_linkSendReceive="True" ccid_ComponentType="Formatted-Text" devicesVisited="[&quot;TSW-1080&quot;]" ccid_themeCSSSet="true" oldID="i4m1hi14cgvtz" pd-receivestatelabel="Contract Enabled"></ch5-text></div>
+
+
+
+{Css}
+@media (max-width: 99999px){#iqnttenuz1{width:626px;height:39px;left:0;top:0;position:absolute;}#ix97{background-color:#ffffff;}.widget-container{background-image:linear-gradient(45deg, #DAE2EA 25%, transparent 25%), linear-gradient(-45deg, #DAE2EA 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #DAE2EA 75%), linear-gradient(-45deg, transparent 75%, #DAE2EA 75%);background-size:20px 20px;background-position:0 0, 0 10px, 10px -10px, -10px 0px;z-index:0;}#icztxhiff9{display:block;left:321px;top:0px;position:absolute;z-index:4;width:96px;height:39px;--ch5-text--height:39px;--ch5-text--width:96px;--ch5-text--font-size:15px;Label_font-size:15px;custom-normal-font-size:15px;}#ioxkcvmmym{display:block;left:102px;top:0px;position:absolute;z-index:3;width:219px;height:39px;--ch5-text--height:39px;--ch5-text--width:219px;--ch5-text--font-size:15px;Label_font-size:15px;custom-normal-font-size:15px;}#i4cz1d1ofz{display:block;left:6px;top:0px;position:absolute;z-index:2;width:96px;height:39px;--ch5-text--height:39px;--ch5-text--width:96px;--ch5-text--font-size:15px;Label_font-size:15px;custom-normal-font-size:15px;}#i4cz1d1ofz .ch5-text :not(i):not(svg){font-family:'Roboto';}#i4cz1d1ofz .ch5-text{min-height:10;min-width:10;padding:0px;}#ioxkcvmmym .ch5-text :not(i):not(svg){font-family:'Roboto';}#ioxkcvmmym .ch5-text{min-height:10;min-width:10;padding:0px;}#icztxhiff9 .ch5-text :not(i):not(svg){font-family:'Roboto';}#icztxhiff9 .ch5-text{min-height:10;min-width:10;padding:0px;}}@media (orientation: landscape) and (max-width: 1281px) and (max-height: 801px), (orientation: landscape) and (max-width: 1279px){#iqnttenuz1{width:626px;height:39px;left:0;top:0;position:absolute;}#icztxhiff9{top:0px;left:321px;position:absolute;}#ioxkcvmmym{left:102px;top:0px;position:absolute;width:219px;--ch5-text--width:219px;}#i4cz1d1ofz{top:0px;left:6px;width:96px;--ch5-text--width:96px;Label_font-size:15px;--ch5-text--font-size:15px;position:absolute;}}
+
+
+
+{PageAttributes}
+
+[Attributes]
+Name = "Seats"
+PageMode = "absolute"
+Id = "13491959-787f-493c-8f5f-f5e45063ebff"
+DisplayBackgroundColor = "False"
+
+[[Elements]]
+Name = ""
+Type = "widgetContainer"
+Status = ""
+Content = ""
+Classes = ["widget-container"]
+
+[[Elements.Components]]
+Name = ""
+Type = "Ch5 Text"
+Status = ""
+Content = ""
+Editable = true
+
+[Elements.Components.Attributes]
+clearLabel = "false"
+labelmodeadvncomponent = "simple"
+horizontalalignment = "left"
+verticalalignment = "middle"
+multilinesupport = "false"
+truncatetext = "false"
+id = "icztxhiff9"
+componentName = "Seat Role"
+ccid_ActiveFont = "'Roboto'"
+ccid_Label = "Chairperson"
+labelinnerhtml = "Chairperson"
+ccid_linkSendReceive = "True"
+ccid_ComponentType = "Formatted-Text"
+devicesVisited = "[\"TSW-1080\"]"
+ccid_themeCSSSet = "true"
+oldID = "i88ecyozdhgl4"
+pd-receivestatelabel = "Contract Enabled"
+[[Elements.Components]]
+Name = ""
+Type = "Ch5 Text"
+Status = ""
+Content = ""
+Editable = true
+
+[Elements.Components.Attributes]
+clearLabel = "false"
+labelmodeadvncomponent = "simple"
+horizontalalignment = "left"
+verticalalignment = "middle"
+multilinesupport = "false"
+truncatetext = "false"
+id = "ioxkcvmmym"
+componentName = "Seat Name"
+ccid_ActiveFont = "'Roboto'"
+ccid_Label = "Jens Claerebout"
+labelinnerhtml = "Jens Claerebout"
+ccid_linkSendReceive = "True"
+ccid_ComponentType = "Formatted-Text"
+devicesVisited = "[\"TSW-1080\"]"
+ccid_themeCSSSet = "true"
+oldID = "iwjdkll6rs8gj"
+pd-receivestatelabel = "Contract Enabled"
+[[Elements.Components]]
+Name = ""
+Type = "Ch5 Text"
+Status = ""
+Content = ""
+Editable = true
+
+[Elements.Components.Attributes]
+clearLabel = "false"
+labelmodeadvncomponent = "simple"
+horizontalalignment = "left"
+verticalalignment = "middle"
+multilinesupport = "false"
+truncatetext = "false"
+id = "i4cz1d1ofz"
+componentName = "Seat Number"
+ccid_ActiveFont = "'Roboto'"
+ccid_Label = "01"
+labelinnerhtml = "01"
+ccid_linkSendReceive = "True"
+ccid_ComponentType = "Formatted-Text"
+devicesVisited = "[\"TSW-1080\"]"
+ccid_themeCSSSet = "true"
+oldID = "i4m1hi14cgvtz"
+pd-receivestatelabel = "Contract Enabled"
+
+[Elements.Attributes]
+categoryname = "Widget Components"
+ccid_ComponentType = "Widget Canvas"
+id = "iqnttenuz1"
+devicesVisited = "[\"TSW-1080\"]"
+defaultWidth = "626px"
+defaultHeight = "39px"
+

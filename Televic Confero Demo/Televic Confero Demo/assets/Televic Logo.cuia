@@ -1,0 +1,22 @@
+{FileMetadata}
+Schema = "1.0.0.0"
+CreatedByAppHost = "2.1501.15.0"
+Created = 2026-10-19 16:03:31.720487+02:00
+LastModifiedByAppHost = "2.1501.15.0"
+Modified = 2026-10-19 16:03:31.720463+02:00
+CreatedByProjectApp = "1.4801.18.0"
+LastModifiedByProjectApp = "1.4801.18.0"
+MinimumProjectApp = ""
+MinimumAppHost = "2.901.0"
+
+{AssetAttributes}
+
+[Attributes]
+Id = "0fb98e91-8158-4158-95a6-55f4bd031d72"
+Name = "Televic Logo"
+SourceUri = "Televic Logo.png"
+AspectRatio = "1"
+AssetSourceType = "File"
+Username = ""
+Password = ""
+

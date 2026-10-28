@@ -1,0 +1,35 @@
+{FileMetadata}
+Schema = "1.0.0.0"
+CreatedByAppHost = "2.1501.15.0"
+Created = 2026-10-19 15:54:51.931363+02:00
+LastModifiedByAppHost = "2.1701.12.0"
+Modified = 2026-10-28 15:51:23.698654+01:00
+CreatedByProjectApp = "1.4801.18.0"
+LastModifiedByProjectApp = "1.4901.18.0"
+MinimumProjectApp = "1.2600.1"
+MinimumAppHost = "2.1700.0"
+
+{DeviceResolutionSource}
+[]
+
+{ProjectAttributes}
+
+[Attributes]
+ComponentKey = "UiEditor"
+Name = "Televic Confero Demo"
+ThemeId = "light-theme.css"
+ProjectThemeIds = "light-theme.css"
+ThemePageColor = "#ffffff"
+IncludeUnusedAsset = "False"
+OverrideThemeColor = "False"
+SdkId = "CH5:2.18.0"
+Id = "a14d2e82-6c02-42bd-9dbc-c39dcb3d9d25"
+RuntimeThemeJoin = "0"
+RuntimeLanguageJoin = "0"
+DefaultComponentMode = "custom"
+DefaultFontFamily = "Roboto"
+DeviceResolutionIds = "D-L-TSW1080-1280-800"
+ipId = "03"
+ProjectSchemaVersion = "13"
+ContractIsStale = "true"
+

@@ -165,6 +165,10 @@ class ModuleIntegration
         lock(sync) Check((bool)settings["options"]["switchOffAllowed"]==false && (bool)settings["options"]["nextInLineIndication"]==false,"Read settings options were not preserved");
         controller.ApplySettings(5,4); Wait(() => feedback.DiscussionMode==5 && feedback.OpenMics==4,"Mode change");
         lock(sync) Check((bool)settings["options"]["pushToMute"],"Hands-free default options");
+        controller.SetDiscussionMode(2); Wait(() => feedback.DiscussionMode==2,"Direct mode change");
+        Check(feedback.OpenMics==4,"Mode change altered open-mic limit");
+        controller.SetOpenMics(6); Wait(() => feedback.OpenMics==6,"Direct open-mic change");
+        Check(feedback.DiscussionMode==2,"Open-mic change altered mode");
         controller.SetRecording(1); Wait(() => feedback.RecordingActive==1,"Recording start");
         controller.SetRecording(0); Wait(() => feedback.RecordingState=="idle","Recording stop");
         lock(sync) recordingWrites.Clear();

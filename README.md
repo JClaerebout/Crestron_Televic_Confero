@@ -24,9 +24,9 @@ Capacities allocate module pins; they do not limit microphones on the Confero co
 
 Feedback outputs are written only when their value changes, including serial text and individual list rows. Repeated API snapshots and unchanged notifications do not retransmit the same values to SIMPL Debugger. Disconnection still clears previously displayed values.
 
-Seat rows are sorted by actual API seat number, including noncontiguous numbers. `Mic_Number[i]` identifies the seat controlled by pulses on `Mic_On[i]` and `Mic_Off[i]`. Outputs `Mic_On_fb`, `Mic_Request_fb`, `Mic_Name`, and `Mic_Role` show confirmed controller feedback. Participant names come from the running meeting and fall back to `Seat N`.
+Seat rows are sorted by actual API seat number, including noncontiguous numbers. `Mic_Number[i]` identifies the seat controlled by pulses on `Mic_Toggle[i]`. Each rising edge toggles that microphone using its latest confirmed controller state. Wire a momentary button to `Mic_Toggle[i]` and use `Mic_On_fb[i]` for its active indication. After rebuilding, update the symbol in SIMPL Windows and reconnect the former on/off controls to the toggle inputs. Outputs `Mic_On_fb`, `Mic_Request_fb`, `Mic_Name`, and `Mic_Role` show confirmed controller feedback. Participant names come from the running meeting and fall back to `Seat N`.
 
-Speaker and request rows retain controller order. Set `Selected_Speaker`, `Selected_Request`, or `Selected_Meeting` to a **1-based row index**, then pulse its action. Index 0 and rows outside the displayed capacity are ignored. The selected row is resolved to its current seat number or stable meeting ID when the action is triggered.
+Speaker and request rows retain controller order. Empty speaker/request number rows output an empty string. Set `Selected_Speaker`, `Selected_Request`, or `Selected_Meeting` to a **1-based row index**, then pulse its action. Index 0 and rows outside the displayed capacity are ignored. The selected row is resolved to its current seat number or stable meeting ID when the action is triggered.
 
 | Inputs/actions | Feedback |
 | --- | --- |
@@ -36,9 +36,9 @@ Speaker and request rows retain controller order. Set `Selected_Speaker`, `Selec
 | `Selected_Meeting` | `Scheduled_Meeting_Name/ID`, `Meeting_Count_fb` |
 | `Recording_Start`, `Recording_Stop` | `Recording_Active_fb`, `Recording_State_fb` |
 | `Wireless_Turn_Off` | `Status_fb` reports the API command result |
-| `Discussion_Mode`, `Number_Of_Open_Mics`, `Apply_Discussion_Settings` | `Discussion_Mode_fb`, `Number_Of_Open_Mics_fb` |
+| `Discussion_Mode`, `Number_Of_Open_Mics` | `Discussion_Mode_fb`, `Number_Of_Open_Mics_fb` |
 
-Discussion mode values: 1 = Direct Speak, 2 = Request, 3 = Group, 4 = Operator, 5 = Hands Free. Set mode and open-mic limit (1–100), then pulse `Apply_Discussion_Settings`. Received mode options are preserved; switching to a mode not read in this session uses the Q-SYS plugin's defaults. The open-mic limit is a live controller setting, independent of the module's compile-time row capacities.
+Discussion mode values: 1 = Direct Speak, 2 = Request, 3 = Group, 4 = Operator, 5 = Hands Free. Changes to mode or open-mic limit (1–100) apply directly, preserving the other current controller setting. The former `Apply_Discussion_Settings` input is reserved as `_skip_` to preserve subsequent input positions. Received mode options are preserved; switching to a mode not read in this session uses the Q-SYS plugin's defaults. The open-mic limit is a live controller setting, independent of the module's compile-time row capacities.
 
 Commands run in order and refresh confirmed metadata. A successful mic PUT does not imply the controller admitted the seat; feedback decides its displayed state. Optional-feature errors (including meeting licensing and rejected recording commands) report through `Status_fb` without disabling working speaker monitoring. Commands are ignored until speaker connectivity is established. Connection loss clears row mappings and feedback. Authentication headers/tokens are never printed.
 

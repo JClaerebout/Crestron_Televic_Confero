@@ -1,0 +1,20 @@
+{
+  "_fileMetadata": {
+    "_schema": "1.0.0.0",
+    "_createdByAppHost": "2.1501.15.0",
+    "_created": "2026-10-19T15:54:52.013945+02:00",
+    "_lastModifiedByAppHost": "2.1501.15.0",
+    "_minimumAppHost": "2.901.0",
+    "_modified": "2026-10-19T15:54:52.013927+02:00"
+  },
+  "_solution": {
+    "_name": "Televic Confero Demo",
+    "_projects": [
+      {
+        "_name": "Televic Confero Demo",
+        "_filename": "Televic Confero Demo/Televic Confero Demo.cuip",
+        "_datetime": "2026-10-19T13:54:51.826549Z"
+      }
+    ]
+  }
+}

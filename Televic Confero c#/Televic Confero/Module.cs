@@ -351,10 +351,28 @@ namespace TelevicConfero
         public void ApplySettings(ushort mode, ushort openMics)
         {
             if (mode < 1 || mode > 5 || openMics < 1 || openMics > 100) return;
+            UpdateSettings(mode, openMics);
+        }
+        public void SetDiscussionMode(ushort mode)
+        {
+            if (mode < 1 || mode > 5) return;
+            UpdateSettings(mode, 0);
+        }
+        public void SetOpenMics(ushort openMics)
+        {
+            if (openMics < 1 || openMics > 100) return;
+            UpdateSettings(0, openMics);
+        }
+        private void UpdateSettings(ushort mode, ushort openMics)
+        {
             Command((s,c) => {
-                string id = Modes[mode - 1]; JToken options;
+                string id = mode == 0 ? (string)s.Settings["microphoneMode"] : Modes[mode - 1];
+                int limit = openMics == 0 ? ((int?)s.Settings["maximumNumberOfSpeakers"] ?? 0) : openMics;
+                if (Array.IndexOf(Modes, id) < 0 || limit < 1 || limit > 100)
+                    throw new InvalidOperationException("Discussion settings are not available yet");
+                JToken options;
                 if (!s.Options.TryGetValue(id, out options)) options = DefaultOptions(id);
-                return Send(s,c,"PUT","discussion/settings",new JObject { ["microphoneMode"] = id, ["maximumNumberOfSpeakers"] = openMics, ["options"] = options.DeepClone() });
+                return Send(s,c,"PUT","discussion/settings",new JObject { ["microphoneMode"] = id, ["maximumNumberOfSpeakers"] = limit, ["options"] = options.DeepClone() });
             });
         }
     }

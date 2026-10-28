@@ -57,6 +57,8 @@ namespace TelevicConfero;
         FUNCTION SetRecording ( INTEGER on );
         FUNCTION WirelessTurnOff ();
         FUNCTION ApplySettings ( INTEGER mode , INTEGER openMics );
+        FUNCTION SetDiscussionMode ( INTEGER mode );
+        FUNCTION SetOpenMics ( INTEGER openMics );
         SIGNED_LONG_INTEGER_FUNCTION GetHashCode ();
         STRING_FUNCTION ToString ();
 

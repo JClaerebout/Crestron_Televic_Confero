@@ -5,10 +5,10 @@
 #USER_SIMPLSHARP_LIBRARY "Televic Confero"
 
 // Edit these capacities for the installation, then rebuild and update the symbol.
-#DEFINE_CONSTANT MIC_COUNT 15
+#DEFINE_CONSTANT MIC_COUNT 100
 #DEFINE_CONSTANT SPEAKER_LIST_COUNT 15
 #DEFINE_CONSTANT QUEUE_LIST_COUNT 15
-#DEFINE_CONSTANT MEETING_LIST_COUNT 20
+#DEFINE_CONSTANT MEETING_LIST_COUNT 5
 #DEFINE_CONSTANT REFRESH_SECONDS 30
 #DEFINE_CONSTANT DEFAULT_HTTPS 0
 #DEFINE_CONSTANT DEBUG_PRINT 0
@@ -18,10 +18,10 @@ STRING_PARAMETER API_Key[255];
 DIGITAL_INPUT _skip_,_skip_,Initialize;
 DIGITAL_INPUT Refresh, Meeting_Start, Meeting_Stop, Start_Selected_Meeting;
 DIGITAL_INPUT Clear_Speakers, Clear_Requests, Turn_Off_Selected_Speaker, Enable_Selected_Request;
-DIGITAL_INPUT Recording_Start, Recording_Stop, Wireless_Turn_Off, Apply_Discussion_Settings;
+DIGITAL_INPUT Recording_Start, Recording_Stop, Wireless_Turn_Off, _skip_;
 ANALOG_INPUT Selected_Speaker, Selected_Request, Selected_Meeting;
 ANALOG_INPUT Discussion_Mode, Number_Of_Open_Mics;
-DIGITAL_INPUT Mic_On[MIC_COUNT], Mic_Off[MIC_COUNT];
+DIGITAL_INPUT Mic_Toggle[MIC_COUNT];
 DIGITAL_OUTPUT _skip_,_skip_,Connected_fb;
 DIGITAL_OUTPUT Meeting_Running_fb, Recording_Active_fb;
 ANALOG_OUTPUT Last_Active_Mic;
@@ -30,7 +30,8 @@ ANALOG_OUTPUT Mic_Count_fb, Speaker_Count_fb, Request_Count_fb, Meeting_Count_fb
 ANALOG_OUTPUT Discussion_Mode_fb, Number_Of_Open_Mics_fb;
 STRING_OUTPUT Meeting_Title_fb, Meeting_ID_fb, Recording_State_fb, Status_fb;
 DIGITAL_OUTPUT Mic_On_fb[MIC_COUNT], Mic_Request_fb[MIC_COUNT];
-ANALOG_OUTPUT Mic_Number[MIC_COUNT], Speaker_Number[SPEAKER_LIST_COUNT], Request_Number[QUEUE_LIST_COUNT];
+STRING_OUTPUT Speaker_Number[SPEAKER_LIST_COUNT], Request_Number[QUEUE_LIST_COUNT];
+STRING_OUTPUT Mic_Number[MIC_COUNT];
 STRING_OUTPUT Mic_Name[MIC_COUNT], Mic_Role[MIC_COUNT];
 STRING_OUTPUT Speaker_Name[SPEAKER_LIST_COUNT], Request_Name[QUEUE_LIST_COUNT];
 STRING_OUTPUT Scheduled_Meeting_Name[MEETING_LIST_COUNT], Scheduled_Meeting_ID[MEETING_LIST_COUNT];
@@ -40,7 +41,9 @@ INTEGER Ready;
 // STRING_OUTPUT is write-only; retain the last transmitted text for comparison.
 STRING Last_Meeting_Title[255], Last_Meeting_ID[255], Last_Recording_State[255], Last_Status[255];
 STRING Last_Mic_Name[MIC_COUNT][255], Last_Mic_Role[MIC_COUNT][255];
+STRING Last_Mic_Number[MIC_COUNT][10];
 STRING Last_Speaker_Name[SPEAKER_LIST_COUNT][255], Last_Request_Name[QUEUE_LIST_COUNT][255];
+STRING Last_Speaker_Number[SPEAKER_LIST_COUNT][10], Last_Request_Number[QUEUE_LIST_COUNT][10];
 STRING Last_Scheduled_Meeting_Name[MEETING_LIST_COUNT][255], Last_Scheduled_Meeting_ID[MEETING_LIST_COUNT][255];
 
 EVENTHANDLER Controller_OnModuleFeedback(ConferoController sender, ModuleFeedbackEventArgs e)
@@ -89,8 +92,12 @@ EVENTHANDLER Controller_OnModuleFeedback(ConferoController sender, ModuleFeedbac
     }
     FOR (i = 1 TO MIC_COUNT)
     {
-        IF (Mic_Number[i] <> Controller.GetSeatNumber(i))
-            Mic_Number[i] = Controller.GetSeatNumber(i);
+        NewText = Itoa(Controller.GetSeatNumber(i));
+        IF (Last_Mic_Number[i] <> NewText)
+        {
+            Last_Mic_Number[i] = NewText;
+            Mic_Number[i] = NewText;
+        }
         IF (Mic_On_fb[i] <> Controller.GetSeatMic(i))
             Mic_On_fb[i] = Controller.GetSeatMic(i);
         IF (Mic_Request_fb[i] <> Controller.GetSeatRequest(i))
@@ -110,8 +117,13 @@ EVENTHANDLER Controller_OnModuleFeedback(ConferoController sender, ModuleFeedbac
     }
     FOR (i = 1 TO SPEAKER_LIST_COUNT)
     {
-        IF (Speaker_Number[i] <> Controller.GetSpeakerNumber(i))
-            Speaker_Number[i] = Controller.GetSpeakerNumber(i);
+        NewText = Itoa(Controller.GetSpeakerNumber(i));
+        IF (NewText = "0") NewText = "";
+        IF (Last_Speaker_Number[i] <> NewText)
+        {
+            Last_Speaker_Number[i] = NewText;
+            Speaker_Number[i] = NewText;
+        }
         NewText = Controller.GetSpeakerName(i);
         IF (Last_Speaker_Name[i] <> NewText)
         {
@@ -121,8 +133,13 @@ EVENTHANDLER Controller_OnModuleFeedback(ConferoController sender, ModuleFeedbac
     }
     FOR (i = 1 TO QUEUE_LIST_COUNT)
     {
-        IF (Request_Number[i] <> Controller.GetRequestNumber(i))
-            Request_Number[i] = Controller.GetRequestNumber(i);
+        NewText = Itoa(Controller.GetRequestNumber(i));
+        IF (NewText = "0") NewText = "";
+        IF (Last_Request_Number[i] <> NewText)
+        {
+            Last_Request_Number[i] = NewText;
+            Request_Number[i] = NewText;
+        }
         NewText = Controller.GetRequestName(i);
         IF (Last_Request_Name[i] <> NewText)
         {
@@ -158,9 +175,20 @@ PUSH Enable_Selected_Request { IF (Ready) Controller.EnableRequest(Selected_Requ
 PUSH Recording_Start { IF (Ready) Controller.SetRecording(1); }
 PUSH Recording_Stop { IF (Ready) Controller.SetRecording(0); }
 PUSH Wireless_Turn_Off { IF (Ready) Controller.WirelessTurnOff(); }
-PUSH Apply_Discussion_Settings { IF (Ready) Controller.ApplySettings(Discussion_Mode, Number_Of_Open_Mics); }
-PUSH Mic_On { IF (Ready) Controller.SetSeatMic(GetLastModifiedArrayIndex(), 1); }
-PUSH Mic_Off { IF (Ready) Controller.SetSeatMic(GetLastModifiedArrayIndex(), 0); }
+CHANGE Discussion_Mode { IF (Ready) Controller.SetDiscussionMode(Discussion_Mode); }
+CHANGE Number_Of_Open_Mics { IF (Ready) Controller.SetOpenMics(Number_Of_Open_Mics); }
+PUSH Mic_Toggle
+{
+    INTEGER Row;
+    IF (Ready)
+    {
+        Row = GetLastModifiedArrayIndex();
+        IF (Controller.GetSeatMic(Row) = 1)
+            Controller.SetSeatMic(Row, 0);
+        ELSE
+            Controller.SetSeatMic(Row, 1);
+    }
+}
 
 EVENTHANDLER Controller_OnFeedback(ConferoController sender, MicFeedbackEventArgs e)
 {
