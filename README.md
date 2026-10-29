@@ -1,68 +1,180 @@
 # Televic Confero Control
 
-SIMPL+ module with a SIMPL# .NET Framework 4.7.2 library, compiled for Crestron 4-Series.
+Crestron module help and programming reference — SIMPL+ / SIMPL#.
 
-Set string parameters `IP` (controller address) and `API_Key` (Bearer token, without the Bearer prefix). HTTP port 9080 is the default; HTTPS uses 9443. An explicit `http://` or `https://` scheme overrides the transport constant. `host:port` is also accepted. HTTPS uses normal certificate validation.
+Provides individual microphone toggles, ordered speaker and request lists, first/last active microphone feedback, meeting control, recording control, and discussion settings. Feedback represents confirmed controller state.
 
-Pulse `Initialize` to start monitoring. A repeated pulse replaces the subscription. An input already high at module startup also initializes it. Releasing the input leaves monitoring running. `Refresh` restarts monitoring and reloads all snapshots. Notifications cover Discussion, Meeting, Room, and Recording.
-
-The module follows the functions and API payloads of the Q-SYS Televic Confero plugin. The repository also includes a SIMPL Windows test program and a Crestron Construct demo interface.
-
-| File or folder | Purpose |
+| Module information | Details |
 | --- | --- |
-| `Televic Confero Control.usp` / `.ush` | SIMPL+ module source and symbol |
-| `Televic Confero c#/Televic Confero/` | SIMPL# library source: connection/event handling in `Class1.cs`, controls and metadata in `Module.cs` |
-| `Televic Confero.clz` | Compiled SIMPL# library used by the module |
-| `televic test.smw` | SIMPL Windows example/test program |
-| `Televic Confero Demo/` | Crestron Construct project, assets, and generated contract output |
-| `Televic Confero Demo.chd2` / `.chd_` | Demo interface output files |
-| `tests/` | Local HTTP integration fixtures |
+| Symbol name | Televic Confero Control |
+| Application | Televic Confero discussion, meeting, and recording control |
+| Control interface | Authenticated HTTP API with notification monitoring |
+| Processor target | Crestron 4-Series |
+| Library | `Televic Confero.clz`; SIMPL# .NET Framework 4.7.2 |
+| PDF reference | [Module help, revision 1.0](Televic_Confero_Control_Help.pdf) |
 
-Open `televic test.smw` to inspect the example wiring. Open `Televic Confero Demo/Televic Confero Demo/Televic Confero Demo.cuip` in Crestron Construct to edit the interface. Module row capacities and interface list sizes are configured separately; check the joins and displayed row counts when adapting the demo.
+## Contents
 
-Edit the following `#DEFINE_CONSTANT` values near the top of `Televic Confero Control.usp`, rebuild, and update the SIMPL symbol:
+1. [Installation and connection](#installation-and-connection)
+2. [Digital inputs](#digital-inputs)
+3. [Analog inputs and configuration](#analog-inputs-and-configuration)
+4. [Digital and analog outputs](#digital-and-analog-outputs)
+5. [Serial outputs and row mapping](#serial-outputs-and-row-mapping)
+6. [Demo interface](#demo-interface)
+7. [Build and testing](#build-and-testing)
 
-| Constant | Default | Meaning |
+## Installation and connection
+
+### Required files and equipment
+
+Use a Crestron 4-Series program, a Televic Confero controller with API access, and a valid API token. Keep `Televic Confero Control.usp`, its matching `.ush` symbol, and `Televic Confero.clz` together in the module location used by the SIMPL project. Use matching files from the same build.
+
+### Setup procedure
+
+1. Add **Televic Confero Control** to the SIMPL program.
+2. Set the two string parameters below.
+3. Wire connection/status feedback and the required controls.
+4. Compile and load the program.
+5. Pulse `Initialize` after program initialization, or hold it high at startup.
+6. Confirm `Connected_fb` is high, then verify seat numbers and names before enabling operator controls.
+
+| Parameter | Format / function |
+| --- | --- |
+| `IP` | Up to 255 characters. Hostname or IP address, with optional scheme and port. Examples: `192.168.1.50`, `confero.example.local:9080`, `http://192.168.1.50:9080`. |
+| `API_Key` | Up to 255 characters. API Bearer token only, without the `Bearer ` prefix. |
+
+HTTP defaults to port 9080; HTTPS defaults to 9443. An explicit `http://` or `https://` scheme overrides `DEFAULT_HTTPS`. HTTPS uses normal certificate validation. Authentication headers and tokens are never printed.
+
+### Initialization and connection indication
+
+Every `Initialize` rising edge cancels the previous monitoring session and starts a replacement. Releasing it leaves monitoring running. `Refresh` restarts an existing session and reloads snapshots; use `Initialize` for the first connection. No stop-monitoring input is exposed.
+
+`Connected_fb` rises after a successful authenticated speaker snapshot. Other metadata may still be loading, and optional-feature failures can be present while it remains high. Consult `Status_fb` for details.
+
+## Digital inputs
+
+Command inputs act on a rising edge; use momentary pulses. Commands require established speaker connectivity and are ignored while disconnected. `Initialize` and `Refresh` manage the monitoring session.
+
+| Signal | Function |
+| --- | --- |
+| `Initialize` | Start or replace monitoring using `IP` and `API_Key`. Also recognized if already high at module startup. |
+| `Refresh` | Restart the existing session and reload all snapshots. |
+| `Meeting_Start` | Start a new meeting from the local template. |
+| `Meeting_Stop` | Stop the current meeting. |
+| `Start_Selected_Meeting` | Start the scheduled meeting at `Selected_Meeting`. |
+| `Clear_Speakers` | Clear the complete active speaker list. |
+| `Clear_Requests` | Clear the complete request-to-speak list. |
+| `Turn_Off_Selected_Speaker` | Turn off the microphone at `Selected_Speaker` in the current speaker list. |
+| `Enable_Selected_Request` | Enable the microphone at `Selected_Request`; the command also clears its request flag. |
+| `Recording_Start` | Request recording state `recording`. |
+| `Recording_Stop` | Request recording state `idle`. |
+| `Wireless_Turn_Off` | Send the device `turnOff` action. Verify its scope on the installed system before exposing the control. |
+| `Mic_Toggle[1..100]` | Toggle the seat mapped to this row using its latest confirmed microphone state. Match the button with `Mic_On_fb` on the same row. |
+
+### Button behavior
+
+A successful microphone command does not guarantee the controller admitted that seat. Use `Mic_On_fb` for indication. Rapid repeated pulses can use the same confirmed state before feedback arrives; allow feedback to settle between operations. Commands execute in order and refresh confirmed metadata.
+
+## Analog inputs and configuration
+
+| Signal | Accepted values / behavior |
+| --- | --- |
+| `Selected_Speaker` | 1-based displayed speaker row. Set before pulsing `Turn_Off_Selected_Speaker`. |
+| `Selected_Request` | 1-based displayed request row. Set before pulsing `Enable_Selected_Request`. |
+| `Selected_Meeting` | 1-based displayed scheduled-meeting row. Set before pulsing `Start_Selected_Meeting`. |
+| `Discussion_Mode` | On change: 1 = Direct Speak; 2 = Request; 3 = Group; 4 = Operator; 5 = Hands Free. Other values are ignored. |
+| `Number_Of_Open_Mics` | On change: 1–100. Other values are ignored. Independent of `MIC_COUNT`. |
+
+Selections of 0, rows beyond configured capacity, and empty rows produce no action. A selected row resolves to the current seat number or scheduled-meeting ID when the action is triggered. A changing list can therefore change the target represented by a row.
+
+Mode and open-mic changes apply directly, preserving the other current controller setting. Received mode options are preserved; switching to a mode not read in this session uses the Q-SYS plugin defaults. The former `Apply_Discussion_Settings` input remains reserved as `_skip_` to preserve subsequent input positions.
+
+### Compile-time constants
+
+Edit these values near the top of `Televic Confero Control.usp`, rebuild, and update the symbol in SIMPL Windows.
+
+| Constant | Default | Purpose |
 | --- | --- | --- |
-| `MIC_COUNT` | 100 | Seat control and feedback rows |
-| `SPEAKER_LIST_COUNT` | 15 | Ordered active speaker rows |
-| `QUEUE_LIST_COUNT` | 15 | Ordered request queue rows |
-| `MEETING_LIST_COUNT` | 5 | Scheduled meeting rows |
-| `REFRESH_SECONDS` | 30 | Metadata reconciliation interval; at least 10 seconds |
-| `DEFAULT_HTTPS` | 0 | 0 = HTTP, 1 = HTTPS unless IP includes a scheme |
-| `DEBUG_PRINT` | 0 | 0 = off, 1 = HTTP results/errors, 2 = also feedback summaries |
+| `MIC_COUNT` | 100 | Seat control and feedback rows. |
+| `SPEAKER_LIST_COUNT` | 15 | Displayed active-speaker rows. |
+| `QUEUE_LIST_COUNT` | 15 | Displayed request rows. |
+| `MEETING_LIST_COUNT` | 5 | Displayed scheduled-meeting rows. |
+| `REFRESH_SECONDS` | 30 | Metadata reconciliation interval; minimum 10 seconds. |
+| `DEFAULT_HTTPS` | 0 | 0 = HTTP, 1 = HTTPS unless `IP` includes a scheme. |
+| `DEBUG_PRINT` | 0 | 0 = off; 1 = HTTP results/errors; 2 = also feedback summaries. |
 
-Capacities allocate module pins; they do not limit microphones on the Confero controller. Counts report the full controller list size, even when only the first configured rows fit. Unused rows clear to 0/empty. First/last active mic feedback always uses the complete speaker list. Choose positive capacities within SIMPL's signal limits.
+Capacities allocate module pins and do not limit the controller's microphones. Counts report the complete list size even when only the first configured rows fit. Choose positive capacities within SIMPL's signal limits. Array ranges below describe the current source configuration.
 
-Feedback outputs are written only when their value changes, including serial text and individual list rows. Repeated API snapshots and unchanged notifications do not retransmit the same values to SIMPL Debugger. Disconnection still clears previously displayed values.
+## Digital and analog outputs
 
-Seat rows are sorted by actual API seat number, including noncontiguous numbers. `Mic_Number[i]` identifies the seat controlled by pulses on `Mic_Toggle[i]`. Each rising edge toggles that microphone using its latest confirmed controller state. Wire a momentary button to `Mic_Toggle[i]` and use `Mic_On_fb[i]` for its active indication. After rebuilding, update the symbol in SIMPL Windows and reconnect the former on/off controls to the toggle inputs. Outputs `Mic_On_fb`, `Mic_Request_fb`, `Mic_Name`, and `Mic_Role` show confirmed controller feedback. Participant names come from the running meeting and fall back to `Seat N`.
-
-Speaker and request rows retain controller order. Empty speaker/request number rows output an empty string. Set `Selected_Speaker`, `Selected_Request`, or `Selected_Meeting` to a **1-based row index**, then pulse its action. Index 0 and rows outside the displayed capacity are ignored. The selected row is resolved to its current seat number or stable meeting ID when the action is triggered.
-
-| Inputs/actions | Feedback |
+| Digital output | High / low meaning |
 | --- | --- |
-| `Turn_Off_Selected_Speaker`, `Enable_Selected_Request` | `Speaker_Number/Name`, `Request_Number/Name`, `Speaker_Count_fb`, `Request_Count_fb` |
-| `Clear_Speakers`, `Clear_Requests` | Confirmed speaker/request lists |
-| `Meeting_Start` (local template), `Meeting_Stop`, `Start_Selected_Meeting` | `Meeting_Running_fb`, `Meeting_Title_fb`, `Meeting_ID_fb` |
-| `Selected_Meeting` | `Scheduled_Meeting_Name/ID`, `Meeting_Count_fb` |
-| `Recording_Start`, `Recording_Stop` | `Recording_Active_fb`, `Recording_State_fb` |
-| `Wireless_Turn_Off` | `Status_fb` reports the API command result |
-| `Discussion_Mode`, `Number_Of_Open_Mics` | `Discussion_Mode_fb`, `Number_Of_Open_Mics_fb` |
+| `Connected_fb` | 1 = authenticated speaker monitoring established. 0 = initialization, failure, or retry. Does not certify every optional feature. |
+| `Meeting_Running_fb` | 1 = current meeting metadata contains a meeting ID. |
+| `Recording_Active_fb` | 1 = recording state is exactly `recording`. 0 can also mean unknown; consult `Recording_State_fb`. |
+| `Mic_On_fb[1..100]` | 1 = mapped seat microphone confirmed on. |
+| `Mic_Request_fb[1..100]` | 1 = mapped seat requesting to speak. |
 
-`Mic_Count_fb` reports the total number of seats returned by the controller. `Mic_Number` is serial text and outputs `"0"` for an unused seat row; unused speaker/request number rows output an empty string. `Recording_State_fb` carries the controller state text and becomes `Unknown` when unavailable; `Recording_Active_fb` is high only for `recording`. `Status_fb` includes metadata errors and the latest command result, which is retained across metadata refreshes.
+| Analog output | Meaning |
+| --- | --- |
+| `First_Active_Mic` | Actual seat number of the first item in the full ordered speaker list. |
+| `Last_Active_Mic` | Actual seat number of the last item in the full ordered speaker list. |
+| `Mic_Count_fb` | Total number of seats returned by the controller. |
+| `Speaker_Count_fb` | Total number of active speakers. |
+| `Request_Count_fb` | Total number of requests to speak. |
+| `Meeting_Count_fb` | Total number of scheduled meetings. |
+| `Discussion_Mode_fb` | 1–5 using the input mode mapping; 0 when unavailable or unrecognized. |
+| `Number_Of_Open_Mics_fb` | Current controller `maximumNumberOfSpeakers`; 0 when unavailable. |
 
-Discussion mode values: 1 = Direct Speak, 2 = Request, 3 = Group, 4 = Operator, 5 = Hands Free. Changes to mode or open-mic limit (1–100) apply directly, preserving the other current controller setting. The former `Apply_Discussion_Settings` input is reserved as `_skip_` to preserve subsequent input positions. Received mode options are preserved; switching to a mode not read in this session uses the Q-SYS plugin's defaults. The open-mic limit is a live controller setting, independent of the module's compile-time row capacities.
+### First and last active microphone
 
-Commands run in order and refresh confirmed metadata. A successful mic PUT does not imply the controller admitted the seat; feedback decides its displayed state. Optional-feature errors (including meeting licensing and rejected recording commands) report through `Status_fb` without disabling working speaker monitoring. Commands are ignored until speaker connectivity is established. Connection loss clears row mappings and feedback. Authentication headers/tokens are never printed.
+These outputs contain seat numbers, not row indexes or activation timestamps. Both are 0 when the speaker list is empty or monitoring is disconnected. They are equal when one microphone is active. The full speaker list is used even if displayed speaker rows are truncated.
 
-Speaker/request notifications supply ordered list updates. Startup, manual refresh, history discontinuity, and commands reconcile snapshots; periodic metadata refresh does not poll either list endpoint. Metadata refresh includes seats, participant names, scheduled meetings, discussion settings, and recording state. Reconciliation runs between event polls, so an idle poll can delay it by up to the 40-second event timeout plus request time. An optional feature request has a 10-second timeout.
+### Monitoring and recovery
 
-- `Connected_fb`: high immediately after a successful authenticated speaker snapshot, without waiting for a speaker change or the first event response. Low during initialization, authentication/communication failure, and retry.
-- `First_Active_Mic`: first seat number in the ordered speaker list.
-- `Last_Active_Mic`: last seat number in the ordered speaker list.
+Notifications cover Discussion, Meeting, Room, and Recording. Speaker/request notifications update the ordered lists. Startup, manual refresh, history discontinuity, and commands reconcile snapshots. Periodic metadata refresh includes seats, participant names, scheduled meetings, settings, and recording state without polling either list endpoint.
 
-Both analogs are 0 for an empty list or disconnected state, and equal for one active microphone. These are seat numbers, not positions in the list. Feedback follows SpeakersChanged events. A lost event history triggers a fresh snapshot. An idle event request reaching its 40-second client timeout triggers a speaker snapshot and renews the poll with the same event cursor. Feedback stays connected if that snapshot succeeds. Communication errors clear feedback and retry after two seconds. A failed request can take up to the 40-second HTTP timeout to be detected; startup feedback does not wait for the first long-poll response.
+Reconciliation runs between event polls, so an idle poll can delay it by up to the 40-second event timeout plus request time. Optional-feature requests have a 10-second timeout. An idle event timeout triggers a speaker snapshot and renews the poll with the same cursor; connection feedback stays high if the snapshot succeeds. Communication failures clear feedback and row mappings, then retry after two seconds. Detection can take up to the 40-second HTTP timeout.
+
+Optional-feature errors, including meeting licensing and rejected recording commands, report through `Status_fb` without disabling working speaker monitoring. Outputs are written only when their values change, including serial text and individual list rows.
+
+## Serial outputs and row mapping
+
+| Serial output | Contents |
+| --- | --- |
+| `Meeting_Title_fb` | Current meeting title, or empty when unavailable. |
+| `Meeting_ID_fb` | Current meeting ID, or empty when unavailable. |
+| `Recording_State_fb` | Controller recording state text; `Unknown` when unavailable. |
+| `Status_fb` | Connection/metadata status and most recent command result or error. The command result is retained across metadata refreshes. |
+| `Mic_Number[1..100]` | Actual seat number as text. Unused seat rows output `"0"`. |
+| `Mic_Name[1..100]` | Participant name from the current meeting; fallback `Seat N`. Empty for unused rows. |
+| `Mic_Role[1..100]` | Controller seat role; empty for unused rows. |
+| `Speaker_Number[1..15]` | Seat number as text in controller speaker order. Empty for unused rows. |
+| `Speaker_Name[1..15]` | Participant name or `Seat N` in the matching speaker row. Empty for unused rows. |
+| `Request_Number[1..15]` | Seat number as text in controller request order. Empty for unused rows. |
+| `Request_Name[1..15]` | Participant name or `Seat N` in the matching request row. Empty for unused rows. |
+| `Scheduled_Meeting_Name[1..5]` | Scheduled meeting name in controller list order. Empty for unused rows. |
+| `Scheduled_Meeting_ID[1..5]` | Stable scheduled-meeting ID for the matching row. Empty for unused rows. |
+
+### Three distinct numbering systems
+
+| Row type | Mapping example |
+| --- | --- |
+| Seat rows | Sorted by actual seat number. If seats are 3, 12, and 40, `Mic_Toggle[2]` controls seat 12 and `Mic_Number[2]` is `"12"`. |
+| Speaker/request rows | Preserve controller list order. `Selected_Speaker = 2` targets the second current speaker, regardless of seat number. |
+| Scheduled-meeting rows | `Selected_Meeting` selects the displayed row; the action uses that row's stable ID. |
+
+## Demo interface
+
+The included Crestron Construct demo provides an example touchpanel interface. The [help PDF](Televic_Confero_Control_Help.pdf) shows the interface on its final page.
+
+Open `televic test.smw` to inspect the SIMPL Windows example wiring. Open `Televic Confero Demo/Televic Confero Demo/Televic Confero Demo.cuip` in Crestron Construct to edit the interface. The repository includes interface output files `Televic Confero Demo.chd2` and `.chd_`.
+
+Module row capacities and interface list sizes are configured separately. Check joins and displayed row counts when adapting the demo.
+
+## Build and testing
+
+Library source is in `Televic Confero c#/Televic Confero/`: `Class1.cs` handles connection/events, and `Module.cs` implements controls and metadata. Local HTTP integration fixtures are in `tests/`.
 
 Run `./build.ps1` to rebuild the C# project in Release configuration, copy its CLZ beside the USP, and compile the USP for 4-Series. Run `./build.ps1 -Test` to also compile and run both local HTTP integration fixtures. The script uses fixed paths for Visual Studio 2022 Community MSBuild, the installed Crestron SIMPL+ compiler, and the .NET Framework C# compiler; adjust those paths if your installation differs. The project targets .NET Framework 4.7.2 and references the bundled Crestron SIMPL# SDK 2.21.237.
 
