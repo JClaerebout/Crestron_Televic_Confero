@@ -1,1 +1,50 @@
+# Local test fixtures, simulator, and developer tools
+/tests/
 /ConferoFakeAPI-TestKit/
+/link-fake-api.ps1
+**/[Ff]ake*[Aa][Pp][Ii]*/
+**/[Ff]ake*[Aa][Pp][Ii]*.py
+**/[Cc]onfero[Ff]ake[Aa][Pp][Ii]*
+**/test*.py
+**/Test*.py
+**/TESTING.md
+**/testing.md
+**/Testing.md
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Local agent configuration and environment files
+/.agents/
+/.codex/
+/.aws/
+.env
+.env.*
+!.env.example
+
+# Visual Studio and restored NuGet packages
+.vs/
+[Bb]in/
+[Oo]bj/
+packages/
+*.user
+*.suo
+
+# Generated Crestron compiler and interface output
+/SPlsWork/
+/Televic Confero Demo/Televic Confero Demo/output/
+*.log
+*.ASV
+*.asv
+*.sm2
+*.smft
+*.sig
+*.dip
+*.lpz
+*.lpz.hash
+/*_archive.zip
+/*_compiled.zip
+
+*.ps1

@@ -174,16 +174,14 @@ Module row capacities and interface list sizes are configured separately. Check 
 
 ## Build and testing
 
-Library source is in `Televic Confero c#/Televic Confero/`: `Class1.cs` handles connection/events, and `Module.cs` implements controls and metadata. Local HTTP integration fixtures are in `tests/`.
+Library source is in `Televic Confero c#/Televic Confero/`: `Class1.cs` handles connection/events, and `Module.cs` implements controls and metadata. Local test fixtures and simulator tools are excluded from the public repository.
 
-Run `./build.ps1` to rebuild the C# project in Release configuration, copy its CLZ beside the USP, and compile the USP for 4-Series. Run `./build.ps1 -Test` to also compile and run both local HTTP integration fixtures. The script uses fixed paths for Visual Studio 2022 Community MSBuild, the installed Crestron SIMPL+ compiler, and the .NET Framework C# compiler; adjust those paths if your installation differs. The project targets .NET Framework 4.7.2 and references the bundled Crestron SIMPL# SDK 2.21.237.
+Run `./build.ps1` to rebuild the C# project in Release configuration, copy its CLZ beside the USP, and compile the USP for 4-Series. The script uses fixed paths for Visual Studio 2022 Community MSBuild, the installed Crestron SIMPL+ compiler, and the .NET Framework C# compiler; adjust those paths if your installation differs. The project targets .NET Framework 4.7.2 and references Crestron SIMPL# SDK 2.21.237. Before building a fresh clone, restore NuGet packages for `Televic Confero c#/Televic Confero.sln` in Visual Studio (or with `nuget restore`). Restored packages are ignored by Git.
 
 The script writes SIMPL+ compiler output to `compile.log` and checks for zero compiler errors and generated module code. It builds the library and SIMPL+ module only; compile the SIMPL Windows program and export the Construct interface separately after changing their wiring or layout. After changing module capacities or pins, update the symbol in SIMPL Windows before recompiling the program.
 
-The integration checks cover speaker ordering, empty and single-speaker states, removal/reactivation, connection failure/recovery, authentication, repeated initialization, notification cursors, and recovery from an actual 40-second idle event timeout without dropping connection feedback. The full-module HTTP fixture additionally checks noncontiguous seat mapping, independent row capacities, all commands, participant names, settings options, external queue/recording events, and optional-feature failures. Tests do not require the shared simulator. Hardware behavior, TLS, and SIMPL wiring still require validation on a Crestron processor connected to Confero.
+Hardware behavior, TLS, and SIMPL wiring require validation on a Crestron processor connected to Confero.
 
 The build normalizes the USP to CRLF because the installed SIMPL+ compiler can silently treat the rest of an LF-only file as a line comment.
 
-The shared fake API is available in `ConferoFakeAPI-TestKit` through a Windows directory junction to the Q-SYS project's test kit. Edits through either project immediately affect the same files. The linked folder is excluded from this repository's Git tracking; commit simulator changes in the Q-SYS repository.
-
-Run `powershell -NoProfile -ExecutionPolicy Bypass -File .\link-fake-api.ps1` to create the link after cloning, or pass `-TargetPath 'C:\path\to\ConferoFakeAPI-TestKit'` if the Q-SYS project is elsewhere. Start the simulator from this workspace with `python ./ConferoFakeAPI-TestKit/ConferoFakeAPI.py --seats 10 --token qsys-test-token`, then open `http://127.0.0.1:9080/`. For Crestron testing, set `IP` to the simulator computer's address and `API_Key` to `qsys-test-token`. The shared folder's `TESTING.md` contains further simulator instructions.
+The optional `./build.ps1 -Test` switch requires the private local `tests/` fixtures, which are not included in a public clone.
